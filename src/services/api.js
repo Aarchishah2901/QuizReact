@@ -13,6 +13,18 @@ export const loginUser = async (userData) => {
 };
 
 //Quiz
-export const getAllQuizzes = async () => {
-    return await axios.get(`${API_URL}/quiz-types/quiz-types`);
+export const getQuizzesByType = async (quizTypeName) => {
+    return await axios.get(`${API_URL}/quiz-types/quiz-types`, {
+        params: { name: quizTypeName },
+    });
 };
+
+//Questions
+export const fetchQuestionsByQuizTypeId = async (quiztype_id) => {
+    try {
+      const response = await axios.get(`${API_URL}/questions/questions/${quiztype_id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };

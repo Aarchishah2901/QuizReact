@@ -6,6 +6,7 @@ import Quiz from './pages/Quiz';
 import Navbar from './components/Navbar';
 import QuizCard from './components/Quizcard';
 import Dashboard from './components/Dashboard';
+import Questions from './pages/Questions';
 
 function AppRoutes() {
     return (
@@ -18,6 +19,7 @@ function AppRoutes() {
                 <Route path="/quiz" element={<Quiz />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/quizcard" element={<QuizCard />} />
+                <Route path="/questions" element={<Questions />} />
 
             </Routes>
         </Router>
