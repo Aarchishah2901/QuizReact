@@ -76,7 +76,7 @@ const QuizPage = () => {
                   <p className="card-text">
                     Take this quiz to test your knowledge!
                   </p>
-                  <Link to={"/questions"}>
+                  <Link to={`/questions/${quiz._id}`}>
                   <button className="btn btn-light w-100">Apply for Quiz</button>
                   </Link>
                 </div>

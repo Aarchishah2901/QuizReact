@@ -19,8 +19,7 @@ function AppRoutes() {
                 <Route path="/quiz" element={<Quiz />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/quizcard" element={<QuizCard />} />
-                <Route path="/questions" element={<Questions />} />
-
+                <Route path="/questions/:quizId" element={<Questions />} />
             </Routes>
         </Router>
     );
