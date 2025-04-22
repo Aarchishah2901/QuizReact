@@ -35,3 +35,19 @@ export const getQuizQuestions = async (quizId) => {
     throw error;
   }
 };
+
+export const submitQuizAnswers = async (quizId, answers, token) => {
+  try {
+    const response = await axios.post(`${API_URL}/results/submit`,
+      { quizId, answers },
+      {
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
