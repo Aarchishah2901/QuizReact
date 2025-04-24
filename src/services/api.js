@@ -36,10 +36,10 @@ export const getQuizQuestions = async (quizId) => {
   }
 };
 
+//Answer/Result
 export const submitQuizAnswers = async (quizId, answers, token) => {
   try {
-    const response = await axios.post(`${API_URL}/results/submit`,
-      { quizId, answers },
+    const response = await axios.post(`${API_URL}/results/submit`, quizId, answers ,
       {
         headers: {
           Authorization: `${token}`,
