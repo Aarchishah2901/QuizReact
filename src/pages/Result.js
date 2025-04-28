@@ -1,56 +1,44 @@
-import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { getResult } from "../services/api";// Make sure you import the correct API function
 
 const Result = () => {
-  // Example static data — later replace with dynamic props or API response
-  const totalQuestions = 10;
-  const correctAnswers = 7;
-  const wrongAnswers = totalQuestions - correctAnswers;
-  const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+  const { userId, quizId } = useParams();  // Extracting from the URL
+  console.log("userId:", userId);  // Check if userId is correct
+  console.log("quizId:", quizId);  // Check if quizId is correct
+
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!userId || !quizId) {
+      setError("Invalid URL parameters");
+      setLoading(false);
+      return;
+    }
+
+    getResult(userId, quizId)
+      .then((data) => {
+        setResult(data.result);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError("Error fetching result");
+        setLoading(false);
+      });
+  }, [userId, quizId]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
-    <div className="container py-5">
-      <div className="text-center mb-5">
-        <h1 className="display-4 fw-bold text-primary">Quiz Results</h1>
-        <p className="lead text-muted">Here's how you performed in your quiz!</p>
-      </div>
-
-      <div className="row justify-content-center">
-        <div className="col-md-8">
-          <div className="card shadow-lg border-0">
-            <div className="card-body p-4">
-              <div className="mb-4 text-center">
-                <span className={`badge ${percentage >= 60 ? 'bg-success' : 'bg-danger'} fs-5`}>
-                  Score: {percentage}%
-                </span>
-              </div>
-
-              <div className="row text-center mb-4">
-                <div className="col">
-                  <h5>Total Questions</h5>
-                  <p className="fs-3 text-primary fw-semibold">{totalQuestions}</p>
-                </div>
-                <div className="col">
-                  <h5>Correct Answers</h5>
-                  <p className="fs-3 text-success fw-semibold">{correctAnswers}</p>
-                </div>
-                <div className="col">
-                  <h5>Wrong Answers</h5>
-                  <p className="fs-3 text-danger fw-semibold">{wrongAnswers}</p>
-                </div>
-              </div>
-
-              <hr />
-
-              <div className="text-center">
-                <a href="/" className="btn btn-outline-primary px-4 mt-3">
-                  Back to Home
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div>
+      <h3>Quiz Result</h3>
+      <p>Total Questions: {result.totalQuestions}</p>
+      <p>Correct Answers: {result.correctAnswers}</p>
+      <p>Wrong Answers: {result.wrongAnswers}</p>
+      <p>Score: {result.score}</p>
     </div>
   );
 };

@@ -37,17 +37,20 @@ export const getQuizQuestions = async (quizId) => {
 };
 
 //Answer/Result
-export const submitQuizAnswers = async (quizId, answers, token) => {
+export const getResult = async (userId, quizId) => {
+  console.log("Fetching result for userId:", userId, "and quizId:", quizId);
+  
   try {
-    const response = await axios.post(`${API_URL}/results/submit`, quizId, answers ,
-      {
-        headers: {
-          Authorization: `${token}`,
-        },
-      }
-    );
-    return response.data;
+    const token = localStorage.getItem('token'); // Get token from localStorage
+    const response = await axios.get(`${API_URL}/results/result/${userId}/${quizId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Send token in Authorization header
+      },
+    });
+    
+    return response.data; // Assuming the result is under "data.result"
   } catch (error) {
-    throw error;
+    console.error('Error fetching result:', error);
+    throw error; // Rethrow the error to be handled in the component
   }
 };
