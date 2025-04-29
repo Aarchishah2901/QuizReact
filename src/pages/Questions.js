@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { getQuizQuestions } from '../services/api';
 import { useNavigate } from "react-router-dom";
 
 const Questions = () => {
+  // const userId = localStorage.getItem('userId');
   const navigate = useNavigate();
-  const { quizId } = useParams();
+  // const { quizId } = useParams();
+  const { userId, quizId } = useParams();
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -59,7 +61,7 @@ const Questions = () => {
   const handleFinish = () => {
     navigate('/result');
   };
-
+  
   return (
     <div className="container my-5">
       <h1 className="text-center mb-4">Quiz Questions</h1>
@@ -121,6 +123,7 @@ const Questions = () => {
               Finish
               </button>
             )}
+            <Link to={`/results/result/${userId}/${quizId}`}>View Result</Link>
           </div>
         </div>
       </div>

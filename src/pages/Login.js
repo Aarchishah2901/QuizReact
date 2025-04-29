@@ -19,6 +19,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await loginUser(formData);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("role", response.data.role);
 
