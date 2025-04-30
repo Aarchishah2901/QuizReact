@@ -59,7 +59,7 @@ const Questions = () => {
   };
 
   const handleFinish = () => {
-    navigate('/result');
+    navigate('/results');
   };
   
   return (
