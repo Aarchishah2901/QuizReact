@@ -39,7 +39,7 @@ export const getQuizQuestions = async (quizId) => {
 //Answer/Result
 export const getResult = async (userId, quizId) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     const response = await axios.get(`${API_URL}/results/result/${userId}/${quizId}`, {
       headers: {
         Authorization: `${token}`,
@@ -47,7 +47,7 @@ export const getResult = async (userId, quizId) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching result:', error);
+    console.error("Error fetching result:", error);
     throw error;
   }
 };

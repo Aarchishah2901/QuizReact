@@ -123,7 +123,7 @@ const Questions = () => {
               Finish
               </button>
             )}
-            <Link to={`/results/result/${userId}/${quizId}`}>View Result</Link>
+            {/* <Link to={`/results/result/${userId}/${quizId}`}>View Result</Link> */}
           </div>
         </div>
       </div>
