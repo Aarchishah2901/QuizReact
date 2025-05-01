@@ -36,7 +36,25 @@ export const getQuizQuestions = async (quizId) => {
   }
 };
 
-//Answer/Result
+//Answer
+export const submitAnswers = async (data) => {
+  try {
+    const response = await axios.post('http://localhost:5000/api/answers/submit', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error submitting answers:', error);
+    throw error;
+  }
+};
+
+//Result
+export const calculateResult = async (userId, quizId) => {
+  return axios.post('http://localhost:5000/api/results/submit', {
+    userId,
+    quizId,
+  });
+};
+
 export const getResult = async (userId, quizId) => {
   try {
     const token = localStorage.getItem("token");

@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { getQuizQuestions } from '../services/api';
+import { useParams } from 'react-router-dom';
+import { getQuizQuestions, submitAnswers, calculateResult} from '../services/api';
 import { useNavigate } from "react-router-dom";
 
 const Questions = () => {
-  // const userId = localStorage.getItem('userId');
-  const navigate = useNavigate();
-  // const { quizId } = useParams();
-  const { userId, quizId } = useParams();
-  const [questions, setQuestions] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [lockedQuestions, setLockedQuestions] = useState(new Set());
-
+      const navigate = useNavigate();
+      const { quizId } = useParams();
+      // const userId = localStorage.getItem('userId');
+      const user = JSON.parse(localStorage.getItem('user'));
+      const userId = user?.userId || null;     
+      const [questions, setQuestions] = useState([]);
+      const [currentIndex, setCurrentIndex] = useState(0);
+      const [selectedAnswers, setSelectedAnswers] = useState({});
+      const [lockedQuestions, setLockedQuestions] = useState(new Set());
+    
   useEffect(() => {
     const fetchQuestions = async () => {
-      
       try {
         const data = await getQuizQuestions(quizId);
         setQuestions(data);
@@ -58,10 +58,35 @@ const Questions = () => {
     }
   };
 
-  const handleFinish = () => {
-    navigate('/results');
-  };
+  // const handleFinish = () => {
+  //   navigate('/results');
+  // };
+
+  const handleFinish = async () => {
+    try {
+      const answersPayload = Object.entries(selectedAnswers).map(([questionId, selectedAnswer]) => ({
+        questionId,
+        selectedOption: selectedAnswer,  // Correct the key here to match the backend
+      }));
   
+      console.log('Payload being sent:', {
+        userId,
+        quizId,
+        answers: answersPayload,
+      });
+
+    const answerResponse = await submitAnswers({ userId, quizId, answers: answersPayload });
+    console.log('Answers submitted:', answerResponse);
+
+    const resultResponse = await calculateResult(userId, quizId);
+    console.log('Result calculated:', resultResponse);
+
+      navigate(`/results/${userId}/${quizId}`);
+    } catch (error) {
+      console.error('Error submitting answers:', error.response?.data || error.message);
+    }
+  };
+
   return (
     <div className="container my-5">
       <h1 className="text-center mb-4">Quiz Questions</h1>
@@ -123,7 +148,6 @@ const Questions = () => {
               Finish
               </button>
             )}
-            {/* <Link to={`/results/result/${userId}/${quizId}`}>View Result</Link> */}
           </div>
         </div>
       </div>
