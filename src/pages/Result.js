@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Result = () => {
+  const navigate = useNavigate();
   const { userId, quizId } = useParams();
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +36,10 @@ const Result = () => {
 
   // Log result to debug
   console.log("Result Data:", result);
+
+  const goToHistory = () => {
+    navigate('/quiz-history');
+  };
 
   return (
     <div className="container mt-5">
@@ -102,6 +107,9 @@ const Result = () => {
           </div>
         </div>
       )}
+      <div className="text-center mt-5">
+        <button className="btn btn-outline-primary" onClick={goToHistory}>View Quiz History</button>
+      </div>
     </div>
   );
 }

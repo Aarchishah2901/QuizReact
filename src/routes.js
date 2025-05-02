@@ -8,6 +8,7 @@ import QuizCard from './components/Quizcard';
 import Dashboard from './components/Dashboard';
 import Questions from './pages/Questions';
 import Result from './pages/Result';
+import QuizHistory from './pages/Quizhistory';
 
 function AppRoutes() {
     return (
@@ -25,6 +26,7 @@ function AppRoutes() {
                 <Route path="/quiz/:quizId/questions" element={<Questions />} />
                 {/* <Route path="/results" element={<Result />} /> */}
                 <Route path="/results/:userId/:quizId" element={<Result />} />
+                <Route path="/quiz-history" element={<QuizHistory />} />
             </Routes>
         </Router>
     );
