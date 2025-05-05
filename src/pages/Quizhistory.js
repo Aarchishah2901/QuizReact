@@ -5,26 +5,30 @@ const QuizHistory = () => {
   const [history, setHistory] = useState([]);
   const [error, setError] = useState("");
 
-  const userId = localStorage.getItem('userId');
-
   useEffect(() => {
-    const fetchHistory = async () => {
-      console.log("userId from localStorage:", userId);
-      if (!userId || userId === "null") {
-        setError("User not logged in.");
-        return;
-      }
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const userId = storedUser?.userId || storedUser?._id;
   
+    console.log("UserID from localStorage (user object):", userId);
+  
+    if (!userId) {
+      setError("User not logged in.");
+      return;
+    }
+  
+    const fetchHistory = async () => {
       try {
         const data = await getQuizHistory(userId);
+        console.log("Fetched quiz history:", data);
         setHistory(data);
       } catch (err) {
-        console.error("Failed to fetch history", err);
+        console.error("Failed to fetch history:", err);
+        setError("Error fetching quiz history.");
       }
     };
   
     fetchHistory();
-  }, [userId]);
+  }, []);
 
   return (
     <div className="container mt-5">
@@ -46,12 +50,12 @@ const QuizHistory = () => {
             </tr>
           </thead>
           <tbody>
-            {history.map((record, index) => (
+              {history.map((record, index) => (
               <tr key={index}>
                 <td>{record.quizId?.quiztype_name || 'Unknown Quiz'}</td>
-                <td>{record.correctAnswers.length}</td>
-                <td>{record.incorrectAnswers.length}</td>
-                <td>{record.correctAnswers.length + record.incorrectAnswers.length}</td>
+                <td>{record.correctAnswers}</td>
+                <td>{record.wrongAnswers}</td>
+                <td>{record.correctAnswers + record.wrongAnswers}</td>
                 <td>{new Date(record.createdAt).toLocaleString()}</td>
               </tr>
             ))}

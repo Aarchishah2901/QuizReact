@@ -72,22 +72,15 @@ export const getResult = async (userId, quizId) => {
 
 //Quizhistory
 export const getQuizHistory = async (userId) => {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    throw new Error("No token found in localStorage");
+  try {
+    const token = localStorage.getItem("token");
+    return await axios.get(`${API_URL}/results/history/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then(res => res.data);
+  } catch (error) {
+    console.error("Error fetching quiz history", error);
+    throw error;
   }
-
-  const response = await fetch(`${API_URL}/results/history/${userId}`, {
-    headers: {
-      Authorization: `${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to fetch quiz history");
-  }
-
-  return await response.json();
 };

@@ -1,19 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { getQuizQuestions, submitAnswers, calculateResult} from '../services/api';
+import { getQuizQuestions, submitAnswers, calculateResult } from '../services/api';
 import { useNavigate } from "react-router-dom";
 
 const Questions = () => {
-      const navigate = useNavigate();
-      const { quizId } = useParams();
-      // const userId = localStorage.getItem('userId');
-      const user = JSON.parse(localStorage.getItem('user'));
-      const userId = user?.userId || null;     
-      const [questions, setQuestions] = useState([]);
-      const [currentIndex, setCurrentIndex] = useState(0);
-      const [selectedAnswers, setSelectedAnswers] = useState({});
-      const [lockedQuestions, setLockedQuestions] = useState(new Set());
-    
+  const { quizId } = useParams();
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user'));
+  const userId = user?.userId || null;
+
+  const [questions, setQuestions] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [lockedQuestions, setLockedQuestions] = useState(new Set());
+  const [timeleft, setTimeLeft] = useState(300);
+
+  const handleFinish = useCallback(async () => {
+    try {
+      const answersPayload = Object.entries(selectedAnswers).map(([questionId, selectedAnswer]) => ({
+        questionId,
+        selectedOption: selectedAnswer,
+      }));
+
+      console.log('Payload being sent:', {
+        userId,
+        quizId,
+        answers: answersPayload,
+      });
+
+      const answerResponse = await submitAnswers({ userId, quizId, answers: answersPayload });
+      console.log('Answers submitted:', answerResponse);
+
+      const resultResponse = await calculateResult(userId, quizId);
+      console.log('Result calculated:', resultResponse);
+
+      const timeTaken = 300 - timeleft;
+
+      navigate(`/results/${userId}/${quizId}`, { state: { timeTaken } });
+    } catch (error) {
+      console.error('Error submitting answers:', error.response?.data || error.message);
+    }
+  }, [selectedAnswers, userId, quizId, timeleft, navigate]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleFinish();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [handleFinish]);
+
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
@@ -25,7 +67,6 @@ const Questions = () => {
     };
 
     fetchQuestions();
-    
   }, [quizId]);
 
   if (questions.length === 0) return <p className="text-center mt-5">Loading...</p>;
@@ -35,7 +76,7 @@ const Questions = () => {
 
   const handleOptionChange = (e) => {
     const value = e.target.value;
-  
+
     if (!lockedQuestions.has(currentQuestionId)) {
       setSelectedAnswers({
         ...selectedAnswers,
@@ -58,38 +99,17 @@ const Questions = () => {
     }
   };
 
-  // const handleFinish = () => {
-  //   navigate('/results');
-  // };
-
-  const handleFinish = async () => {
-    try {
-      const answersPayload = Object.entries(selectedAnswers).map(([questionId, selectedAnswer]) => ({
-        questionId,
-        selectedOption: selectedAnswer,  // Correct the key here to match the backend
-      }));
-  
-      console.log('Payload being sent:', {
-        userId,
-        quizId,
-        answers: answersPayload,
-      });
-
-    const answerResponse = await submitAnswers({ userId, quizId, answers: answersPayload });
-    console.log('Answers submitted:', answerResponse);
-
-    const resultResponse = await calculateResult(userId, quizId);
-    console.log('Result calculated:', resultResponse);
-
-      navigate(`/results/${userId}/${quizId}`);
-    } catch (error) {
-      console.error('Error submitting answers:', error.response?.data || error.message);
-    }
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   return (
     <div className="container my-5">
       <h1 className="text-center mb-4">Quiz Questions</h1>
+
+      <div className="alert alert-warning text-center fw-bold">TimeLeft: {formatTime(timeleft)}</div>
 
       <div className="card shadow-lg">
         <div className="card-body">
@@ -116,7 +136,6 @@ const Questions = () => {
                       value={option}
                       onChange={handleOptionChange}
                       checked={isSelected}
-                      // disabled={!!selectedValue} // Disable if already answered
                       disabled={lockedQuestions.has(currentQuestionId)}
                     />
                     <label className="form-check-label" htmlFor={`option-${idx}`}>
@@ -145,7 +164,7 @@ const Questions = () => {
               </button>
             ) : (
               <button className="btn btn-success px-4" onClick={handleFinish}>
-              Finish
+                Finish
               </button>
             )}
           </div>
