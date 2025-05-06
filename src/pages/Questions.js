@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getQuizQuestions, submitAnswers, calculateResult } from '../services/api';
-import { useNavigate } from "react-router-dom";
 
 const Questions = () => {
   const { quizId } = useParams();
@@ -22,18 +21,8 @@ const Questions = () => {
         selectedOption: selectedAnswer,
       }));
 
-      console.log('Payload being sent:', {
-        userId,
-        quizId,
-        answers: answersPayload,
-      });
-
       const answerResponse = await submitAnswers({ userId, quizId, answers: answersPayload });
-      console.log('Answers submitted:', answerResponse);
-
       const resultResponse = await calculateResult(userId, quizId);
-      console.log('Result calculated:', resultResponse);
-
       const timeTaken = 300 - timeleft;
 
       navigate(`/results/${userId}/${quizId}`, { state: { timeTaken } });
@@ -65,7 +54,6 @@ const Questions = () => {
         console.error('Failed to load quiz questions', error);
       }
     };
-
     fetchQuestions();
   }, [quizId]);
 
@@ -76,7 +64,6 @@ const Questions = () => {
 
   const handleOptionChange = (e) => {
     const value = e.target.value;
-
     if (!lockedQuestions.has(currentQuestionId)) {
       setSelectedAnswers({
         ...selectedAnswers,
@@ -105,29 +92,55 @@ const Questions = () => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  const zoomStyle = timeleft <= 30 ? {
+    animation: 'zoomInOut 1s ease-in-out infinite'
+  } : {};
+
   return (
     <div className="container my-5">
       <h1 className="text-center mb-4">Quiz Questions</h1>
 
-      <div className="alert alert-warning text-center fw-bold">TimeLeft: {formatTime(timeleft)}</div>
+      {timeleft <= 30 && (
+        <style>
+          {`
+            @keyframes zoomInOut {
+              0% { transform: scale(1); }
+              50% { transform: scale(1.2); }
+              100% { transform: scale(1); }
+            }
+          `}
+        </style>
+      )}
 
-      <div className="card shadow-lg">
-        <div className="card-body">
-          <h5 className="card-title">
-            {currentIndex + 1}.{" "}
+      <div
+        className={`alert text-center fw-bold ${
+          timeleft <= 30 ? 'alert-danger' :
+          timeleft <= 120 ? 'alert-warning' :
+          timeleft <= 300 ? 'alert-success' :
+          'alert-secondary'
+        }`}
+        style={zoomStyle}
+      >
+        TimeLeft: {formatTime(timeleft)}
+      </div>
+
+      <div className="card bg-light shadow-sm border-0 rounded-4">
+        <div className="card-body px-5 py-4">
+          <h5 className="card-title text-dark mb-4 fs-5">
+            <span className="badge bg-primary me-2">{currentIndex + 1}</span>
             {currentQuestion.question || currentQuestion.question_text || currentQuestion.title || (
               <span className="text-danger">[Question text missing]</span>
             )}
           </h5>
 
-          <div className="mt-4">
+          <div className="mt-3">
             {currentQuestion.options && currentQuestion.options.length > 0 ? (
               currentQuestion.options.map((option, idx) => {
                 const selectedValue = selectedAnswers[currentQuestionId];
                 const isSelected = selectedValue === option;
 
                 return (
-                  <div className="form-check" key={idx}>
+                  <div className="form-check mb-3" key={idx}>
                     <input
                       className="form-check-input"
                       type="radio"
@@ -138,7 +151,10 @@ const Questions = () => {
                       checked={isSelected}
                       disabled={lockedQuestions.has(currentQuestionId)}
                     />
-                    <label className="form-check-label" htmlFor={`option-${idx}`}>
+                    <label
+                      className={`form-check-label ${isSelected ? 'fw-semibold text-success' : 'text-dark'}`}
+                      htmlFor={`option-${idx}`}
+                    >
                       {option}
                     </label>
                   </div>
@@ -149,9 +165,9 @@ const Questions = () => {
             )}
           </div>
 
-          <div className="d-flex justify-content-end gap-2 mt-4">
+          <div className="d-flex justify-content-between mt-5">
             <button
-              className="btn btn-primary px-4"
+              className="btn btn-outline-dark px-4"
               onClick={handlePrev}
               disabled={currentIndex === 0}
             >

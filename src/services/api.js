@@ -72,15 +72,6 @@ export const getResult = async (userId, quizId) => {
 
 //Quizhistory
 export const getQuizHistory = async (userId) => {
-  try {
-    const token = localStorage.getItem("token");
-    return await axios.get(`${API_URL}/results/history/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).then(res => res.data);
-  } catch (error) {
-    console.error("Error fetching quiz history", error);
-    throw error;
-  }
+  const response = await axios.get(`http://localhost:5000/api/results/history/${userId}`);
+  return response.data;
 };
