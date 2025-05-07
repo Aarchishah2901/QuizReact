@@ -18,6 +18,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      localStorage.setItem("isAuthenticated", "true");
       const response = await loginUser(formData);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       localStorage.setItem("token", response.data.token);

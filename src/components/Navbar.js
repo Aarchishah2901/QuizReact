@@ -7,6 +7,8 @@ const Navbar = () => {
   const user = JSON.parse(localStorage.getItem('user'));
 
   const handleLogout = () => {
+    localStorage.setItem("isAuthenticated", "false");
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
     toast.success('Logged out successfully!');
     setTimeout(() => navigate('/login'), 1500);
