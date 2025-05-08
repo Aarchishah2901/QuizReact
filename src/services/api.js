@@ -13,7 +13,7 @@ export const loginUser = async (userData) => {
 };
 
 //Quiz
-export const getQuizzesByType = async (quizTypeName) => {
+export const getAllQuizTypes = async (quizTypeName) => {
     return await axios.get(`${API_URL}/quiz-types/quiz-types`, {
         params: { name: quizTypeName },
     });
@@ -39,7 +39,7 @@ export const getQuizQuestions = async (quizId) => {
 //Answer
 export const submitAnswers = async (data) => {
   try {
-    const response = await axios.post('http://localhost:5000/api/answers/submit', data);
+    const response = await axios.post(`${API_URL}/answers/submit`, data);
     return response.data;
   } catch (error) {
     console.error('Error submitting answers:', error);
@@ -49,7 +49,7 @@ export const submitAnswers = async (data) => {
 
 //Result
 export const calculateResult = async (userId, quizId) => {
-  return axios.post('http://localhost:5000/api/results/submit', {
+  return axios.post(`${API_URL}/results/submit`, {
     userId,
     quizId,
   });
@@ -72,6 +72,6 @@ export const getResult = async (userId, quizId) => {
 
 //Quizhistory
 export const getQuizHistory = async (userId) => {
-  const response = await axios.get(`http://localhost:5000/api/results/history/${userId}`);
+  const response = await axios.get(`${API_URL}/results/history/${userId}`);
   return response.data;
 };

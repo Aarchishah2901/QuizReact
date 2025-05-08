@@ -368,7 +368,7 @@ const Questions = () => {
             )}
           </div>
 
-          <div className="d-flex justify-content-between mt-4">
+          <div className="d-flex justify-content-between mt-4 flex-wrap gap-3">
   {/* Previous Button */}
   <button
     className="btn btn-outline-dark px-4"
@@ -389,23 +389,22 @@ const Questions = () => {
     Submit Answer
   </button>
 
-  {/* Next Button (only visible when not last question) */}
+  {/* Next Button (always enabled unless last question) */}
   {currentIndex < questions.length - 1 && (
     <button
       className="btn btn-primary px-4"
       onClick={handleNext}
-      disabled={!submittedQuestions.has(currentQuestionId)}
     >
       Next
     </button>
   )}
 
-  {/* Finish Button (only visible on last question) */}
+  {/* Finish Button (only on last question, enabled after submission) */}
   {currentIndex === questions.length - 1 && (
     <button
       className="btn btn-danger px-4"
       onClick={handleFinish}
-      disabled={!submittedQuestions.has(currentQuestionId)}
+      // disabled={!submittedQuestions.has(currentQuestionId)}
     >
       Finish
     </button>
