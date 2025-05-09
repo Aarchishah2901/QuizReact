@@ -9,27 +9,33 @@
 //   const userId = user?.userId || null;
 
 //   const [questions, setQuestions] = useState([]);
+//   const [quizName, setQuizName] = useState('');
 //   const [currentIndex, setCurrentIndex] = useState(0);
 //   const [selectedAnswers, setSelectedAnswers] = useState({});
 //   const [lockedQuestions, setLockedQuestions] = useState(new Set());
+//   const [submittedQuestions, setSubmittedQuestions] = useState(new Set());
 //   const [timeleft, setTimeLeft] = useState(300);
+//   const [timeTaken, setTimeTaken] = useState(0);
+//   const [showToast, setShowToast] = useState(false);
+//   const [quizSubmitted, setQuizSubmitted] = useState(false);
 
 //   const handleFinish = useCallback(async () => {
+//     if (Object.keys(selectedAnswers).length === 0) return;
+  
 //     try {
-//       const answersPayload = Object.entries(selectedAnswers).map(([questionId, selectedAnswer]) => ({
+//       const answersPayload = Object.entries(selectedAnswers).map(([questionId, selectedOption]) => ({
 //         questionId,
-//         selectedOption: selectedAnswer,
+//         selectedOption,
 //       }));
-
-//       const answerResponse = await submitAnswers({ userId, quizId, answers: answersPayload });
-//       const resultResponse = await calculateResult(userId, quizId);
-//       const timeTaken = 300 - timeleft;
-
-//       navigate(`/results/${userId}/${quizId}`, { state: { timeTaken } });
+  
+//       await submitAnswers({ userId, quizId, answers: answersPayload, timeTaken });
+//       await calculateResult(userId, quizId);
+  
+//       setQuizSubmitted(true);
 //     } catch (error) {
 //       console.error('Error submitting answers:', error.response?.data || error.message);
 //     }
-//   }, [selectedAnswers, userId, quizId, timeleft, navigate]);
+//   }, [selectedAnswers, userId, quizId, timeTaken]);
 
 //   useEffect(() => {
 //     const timer = setInterval(() => {
@@ -41,7 +47,9 @@
 //         }
 //         return prev - 1;
 //       });
+//       setTimeTaken(prev => prev + 1);
 //     }, 1000);
+
 //     return () => clearInterval(timer);
 //   }, [handleFinish]);
 
@@ -50,6 +58,9 @@
 //       try {
 //         const data = await getQuizQuestions(quizId);
 //         setQuestions(data);
+//         if (data.length > 0) {
+//           setQuizName(data[0].quiztype_name || 'Unknown Quiz');
+//         }
 //       } catch (error) {
 //         console.error('Failed to load quiz questions', error);
 //       }
@@ -60,22 +71,29 @@
 //   if (questions.length === 0) return <p className="text-center mt-5">Loading...</p>;
 
 //   const currentQuestion = questions[currentIndex];
-//   const currentQuestionId = currentQuestion._id || currentIndex;
+//   const currentQuestionId = currentQuestion._id;
 
 //   const handleOptionChange = (e) => {
 //     const value = e.target.value;
-//     if (!lockedQuestions.has(currentQuestionId)) {
-//       setSelectedAnswers({
-//         ...selectedAnswers,
+//     if (!lockedQuestions.has(currentQuestionId) && timeleft > 0) {
+//       setSelectedAnswers(prev => ({
+//         ...prev,
 //         [currentQuestionId]: value,
-//       });
+//       }));
+//     }
+//   };
+
+//   const handleSubmitAnswer = () => {
+//     if (selectedAnswers[currentQuestionId]) {
+//       setLockedQuestions(prev => new Set(prev).add(currentQuestionId));
+//       setSubmittedQuestions(prev => new Set(prev).add(currentQuestionId));
+//     } else {
+//       alert('Please select an option before submitting.');
 //     }
 //   };
 
 //   const handleNext = () => {
 //     if (currentIndex < questions.length - 1) {
-//       const currentQId = questions[currentIndex]._id;
-//       setLockedQuestions(prev => new Set(prev).add(currentQId));
 //       setCurrentIndex(currentIndex + 1);
 //     }
 //   };
@@ -84,6 +102,10 @@
 //     if (currentIndex > 0) {
 //       setCurrentIndex(currentIndex - 1);
 //     }
+//   };
+
+//   const handleViewScore = () => {
+//     navigate(`/results/${userId}/${quizId}`, { state: { timeTaken } });
 //   };
 
 //   const formatTime = (seconds) => {
@@ -98,7 +120,8 @@
 
 //   return (
 //     <div className="container my-5">
-//       <h1 className="text-center mb-4">Quiz Questions</h1>
+//       <h1 className="text-center mb-3">Quiz Questions</h1>
+//       <h5 className="text-center text-primary mb-4">Quiz Type: {quizName}</h5>
 
 //       {timeleft <= 30 && (
 //         <style>
@@ -134,7 +157,7 @@
 //           </h5>
 
 //           <div className="mt-3">
-//             {currentQuestion.options && currentQuestion.options.length > 0 ? (
+//             {currentQuestion.options?.length > 0 ? (
 //               currentQuestion.options.map((option, idx) => {
 //                 const selectedValue = selectedAnswers[currentQuestionId];
 //                 const isSelected = selectedValue === option;
@@ -165,22 +188,35 @@
 //             )}
 //           </div>
 
-//           <div className="d-flex justify-content-between mt-5">
-//             <button
-//               className="btn btn-outline-dark px-4"
-//               onClick={handlePrev}
-//               disabled={currentIndex === 0}
-//             >
+          
+//           <div className="d-flex justify-content-between mt-4 flex-wrap gap-3">
+//             <button className="btn btn-outline-dark px-4" onClick={handlePrev} disabled={currentIndex === 0}>
 //               Previous
 //             </button>
 
-//             {currentIndex < questions.length - 1 ? (
-//               <button className="btn btn-success px-4" onClick={handleNext}>
+//             <button
+//               className="btn btn-success px-4"
+//               onClick={handleSubmitAnswer}
+//               disabled={!selectedAnswers[currentQuestionId] || submittedQuestions.has(currentQuestionId) || timeleft <= 0} // Disable if time is up
+//             >
+//               Submit Answer
+//             </button>
+
+//             {currentIndex < questions.length - 1 && (
+//               <button className="btn btn-primary px-4" onClick={handleNext} disabled={timeleft <= 0}>
 //                 Next
 //               </button>
-//             ) : (
-//               <button className="btn btn-success px-4" onClick={handleFinish}>
+//             )}
+
+//             {currentIndex === questions.length - 1 && (
+//               <button className="btn btn-danger px-4" onClick={handleFinish} disabled={timeleft <= 0}>
 //                 Finish
+//               </button>
+//             )}
+
+//             {quizSubmitted && (
+//               <button className="btn btn-primary px-4 ms-auto" onClick={handleViewScore}>
+//                 View Score
 //               </button>
 //             )}
 //           </div>
@@ -209,23 +245,33 @@ const Questions = () => {
   const [lockedQuestions, setLockedQuestions] = useState(new Set());
   const [submittedQuestions, setSubmittedQuestions] = useState(new Set());
   const [timeleft, setTimeLeft] = useState(300);
+  const [timeTaken, setTimeTaken] = useState(0);
+  const [showToast, setShowToast] = useState(false);
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
 
   const handleFinish = useCallback(async () => {
+    if (questions.length === 0) return;
+
+    const allAnswered = questions.every((q) => selectedAnswers.hasOwnProperty(q._id));
+
+    if (!allAnswered) {
+      setShowToast(true);
+      return;
+    }
+
     try {
-      const answersPayload = Object.entries(selectedAnswers).map(([questionId, selectedAnswer]) => ({
+      const answersPayload = Object.entries(selectedAnswers).map(([questionId, selectedOption]) => ({
         questionId,
-        selectedOption: selectedAnswer,
+        selectedOption,
       }));
 
-      await submitAnswers({ userId, quizId, answers: answersPayload });
+      await submitAnswers({ userId, quizId, answers: answersPayload, timeTaken });
       await calculateResult(userId, quizId);
-
-      const timeTaken = 300 - timeleft;
-      navigate(`/results/${userId}/${quizId}`, { state: { timeTaken } });
+      setQuizSubmitted(true);
     } catch (error) {
       console.error('Error submitting answers:', error.response?.data || error.message);
     }
-  }, [selectedAnswers, userId, quizId, timeleft, navigate]);
+  }, [selectedAnswers, userId, quizId, timeTaken, questions]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -237,7 +283,9 @@ const Questions = () => {
         }
         return prev - 1;
       });
+      setTimeTaken(prev => prev + 1);
     }, 1000);
+
     return () => clearInterval(timer);
   }, [handleFinish]);
 
@@ -247,7 +295,7 @@ const Questions = () => {
         const data = await getQuizQuestions(quizId);
         setQuestions(data);
         if (data.length > 0) {
-          setQuizName(data[0].quiztype_name); // Set quiz name from first question
+          setQuizName(data[0].quiztype_name || 'Unknown Quiz');
         }
       } catch (error) {
         console.error('Failed to load quiz questions', error);
@@ -256,6 +304,13 @@ const Questions = () => {
     fetchQuestions();
   }, [quizId]);
 
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => setShowToast(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
+
   if (questions.length === 0) return <p className="text-center mt-5">Loading...</p>;
 
   const currentQuestion = questions[currentIndex];
@@ -263,7 +318,7 @@ const Questions = () => {
 
   const handleOptionChange = (e) => {
     const value = e.target.value;
-    if (!lockedQuestions.has(currentQuestionId)) {
+    if (!lockedQuestions.has(currentQuestionId) && timeleft > 0) {
       setSelectedAnswers(prev => ({
         ...prev,
         [currentQuestionId]: value,
@@ -272,8 +327,12 @@ const Questions = () => {
   };
 
   const handleSubmitAnswer = () => {
-    setLockedQuestions(prev => new Set(prev).add(currentQuestionId));
-    setSubmittedQuestions(prev => new Set(prev).add(currentQuestionId));
+    if (selectedAnswers[currentQuestionId]) {
+      setLockedQuestions(prev => new Set(prev).add(currentQuestionId));
+      setSubmittedQuestions(prev => new Set(prev).add(currentQuestionId));
+    } else {
+      alert('Please select an option before submitting.');
+    }
   };
 
   const handleNext = () => {
@@ -288,6 +347,10 @@ const Questions = () => {
     }
   };
 
+  const handleViewScore = () => {
+    navigate(`/results/${userId}/${quizId}`, { state: { timeTaken } });
+  };
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -300,8 +363,23 @@ const Questions = () => {
 
   return (
     <div className="container my-5">
-     <h1 className="text-center mb-3">Welcome to the Online Quiz Portal</h1>
-     <h4 className="text-center mb-2">Now Playing: <span className="text-primary">{quizName}</span> Quiz</h4>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 11 }}>
+          <div className="toast show align-items-center text-white bg-danger border-0" role="alert">
+            <div className="d-flex">
+              <div className="toast-body">
+                Please answer all the questions before finishing the quiz.
+              </div>
+              <button type="button" className="btn-close btn-close-white me-2 m-auto" onClick={() => setShowToast(false)}></button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <h1 className="text-center mb-3">Quiz Questions</h1>
+      <h5 className="text-center text-primary mb-4">Quiz Type: {quizName}</h5>
 
       {timeleft <= 30 && (
         <style>
@@ -324,20 +402,20 @@ const Questions = () => {
         }`}
         style={zoomStyle}
       >
-        Time Left: {formatTime(timeleft)}
+        TimeLeft: {formatTime(timeleft)}
       </div>
 
       <div className="card bg-light shadow-sm border-0 rounded-4">
         <div className="card-body px-5 py-4">
           <h5 className="card-title text-dark mb-4 fs-5">
             <span className="badge bg-primary me-2">{currentIndex + 1}</span>
-            {currentQuestion.question_text || currentQuestion.question || currentQuestion.title || (
+            {currentQuestion.question || currentQuestion.question_text || currentQuestion.title || (
               <span className="text-danger">[Question text missing]</span>
             )}
           </h5>
 
           <div className="mt-3">
-            {currentQuestion.options && currentQuestion.options.length > 0 ? (
+            {currentQuestion.options?.length > 0 ? (
               currentQuestion.options.map((option, idx) => {
                 const selectedValue = selectedAnswers[currentQuestionId];
                 const isSelected = selectedValue === option;
@@ -369,47 +447,36 @@ const Questions = () => {
           </div>
 
           <div className="d-flex justify-content-between mt-4 flex-wrap gap-3">
-  {/* Previous Button */}
-  <button
-    className="btn btn-outline-dark px-4"
-    onClick={handlePrev}
-    disabled={currentIndex === 0}
-  >
-    Previous
-  </button>
+            <button className="btn btn-outline-dark px-4" onClick={handlePrev} disabled={currentIndex === 0}>
+              Previous
+            </button>
 
-  {/* Submit Answer Button */}
-  <button
-    className="btn btn-success px-4"
-    onClick={handleSubmitAnswer}
-    disabled={
-      !selectedAnswers[currentQuestionId] || submittedQuestions.has(currentQuestionId)
-    }
-  >
-    Submit Answer
-  </button>
+            <button
+              className="btn btn-success px-4"
+              onClick={handleSubmitAnswer}
+              disabled={!selectedAnswers[currentQuestionId] || submittedQuestions.has(currentQuestionId) || timeleft <= 0}
+            >
+              Submit Answer
+            </button>
 
-  {/* Next Button (always enabled unless last question) */}
-  {currentIndex < questions.length - 1 && (
-    <button
-      className="btn btn-primary px-4"
-      onClick={handleNext}
-    >
-      Next
-    </button>
-  )}
+            {currentIndex < questions.length - 1 && (
+              <button className="btn btn-primary px-4" onClick={handleNext} disabled={timeleft <= 0}>
+                Next
+              </button>
+            )}
 
-  {/* Finish Button (only on last question, enabled after submission) */}
-  {currentIndex === questions.length - 1 && (
-    <button
-      className="btn btn-danger px-4"
-      onClick={handleFinish}
-      // disabled={!submittedQuestions.has(currentQuestionId)}
-    >
-      Finish
-    </button>
-  )}
-</div>
+            {currentIndex === questions.length - 1 && (
+              <button className="btn btn-danger px-4" onClick={handleFinish} disabled={timeleft <= 0}>
+                Finish
+              </button>
+            )}
+
+            {quizSubmitted && (
+              <button className="btn btn-primary px-4 ms-auto" onClick={handleViewScore}>
+                View Score
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

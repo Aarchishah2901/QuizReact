@@ -1,22 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { getQuizHistory } from "../services/api";
-import { Spinner, Dropdown, DropdownButton } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 const QuizHistory = () => {
   const [history, setHistory] = useState([]);
-  const [quizTypes, setQuizTypes] = useState([]);
-  const [selectedQuizId, setSelectedQuizId] = useState(null);
-  const [userTopScores, setUserTopScores] = useState([]);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     const userId = storedUser?.userId || storedUser?._id;
 
-    
     if (!userId) {
       setError("User not logged in.");
       setLoading(false);
@@ -27,23 +23,6 @@ const QuizHistory = () => {
       try {
         const data = await getQuizHistory(userId);
         setHistory(data);
-
-        const uniqueQuizTypes = [];
-        const seen = new Set();
-
-        data.forEach((record) => {
-          const quizName = record.quizId?.quiztype_name;
-          const quizId = record.quizId?._id;
-
-          if (quizId && !seen.has(quizId)) {
-            seen.add(quizId);
-            uniqueQuizTypes.push({ id: quizId, name: quizName });
-          }
-        });
-          console.log("hello",uniqueQuizTypes);
-          
-        setQuizTypes(uniqueQuizTypes);
-        console.log("function",quizTypes);
       } catch (err) {
         console.error("Error fetching quiz history:", err);
         setError("Failed to fetch quiz history.");
@@ -55,18 +34,24 @@ const QuizHistory = () => {
     fetchHistory();
   }, []);
 
-  const handleNavigateQuiz = (quizId) => {
-    navigate(`/quiz/${quizId}`);
-  };
+  const getHighestScoresPerQuiz = () => {
+    const scoresByQuiz = {};
 
-  const handleViewTopScores = (quizId) => {
-    setSelectedQuizId(quizId);
-    const userScores = history
-      .filter((record) => record.quizId?._id === quizId)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+    history.forEach((record) => {
+      const quizId = record.quizId?._id;
+      const quizName = record.quizId?.quiztype_name;
+      if (!quizId) return;
 
-    setUserTopScores(userScores);
+      if (!scoresByQuiz[quizId] || record.score > scoresByQuiz[quizId].score) {
+        scoresByQuiz[quizId] = {
+          name: quizName,
+          score: record.score,
+          date: record.createdAt,
+        };
+      }
+    });
+
+    return Object.values(scoresByQuiz);
   };
 
   return (
@@ -81,63 +66,49 @@ const QuizHistory = () => {
         <div className="alert alert-danger text-center">{error}</div>
       ) : (
         <>
-          <div className="d-flex justify-content-between mb-4 flex-wrap gap-3">
-            <DropdownButton
-              id="quiz-navigate-dropdown"
-              title="Take a Quiz"
-              onSelect={handleNavigateQuiz}
-              variant="outline-primary"
+          <div className="d-flex justify-content-end mb-3">
+            <button
+              className="btn btn-success me-2"
+              onClick={() => navigate("/dashboard")}
             >
-              {quizTypes.map((quiz) => (
-                <Dropdown.Item key={quiz.id} eventKey={quiz.id}>
-                  {quiz.name}
-                </Dropdown.Item>
-              ))}
-            </DropdownButton>
-            <div className="d-flex justify-content-end mb-3">
-              <button className="btn btn-primary" onClick={() => navigate("/quiz")}>View Quiz</button>
+              Dashboard
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate("/quiz")}
+            >
+              View Quiz
+            </button>
+          </div>
+
+          {history.length > 0 && (
+            <div className="mb-5">
+              <h4 className="text-success fw-bold">
+                Your Highest Scores per Quiz
+              </h4>
+              <table className="table table-bordered text-center mt-3 shadow-sm">
+                <thead className="table-success">
+                  <tr>
+                    <th>Sr.No</th>
+                    <th>Quiz Name</th>
+                    <th>Highest Score</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getHighestScoresPerQuiz().map((record, index) => (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>{record.name}</td>
+                      <td>{record.score}</td>
+                      <td>{new Date(record.date).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <DropdownButton
-              id="top-scores-dropdown"
-              title="View My Top Scores"
-              onSelect={handleViewTopScores}
-              variant="outline-success"
-            >
-              {quizTypes.map((quiz) => (
-                <Dropdown.Item key={quiz.id} eventKey={quiz.id}>
-                  {quiz.name}
-                </Dropdown.Item>
-              ))}
-            </DropdownButton>
-          </div>
-          {selectedQuizId && userTopScores.length > 0 && (
-          <div className="card mb-4 shadow-sm">
-            <div className="card-header bg-success text-white fw-bold">
-              Your Scores for:{" "}
-            {quizTypes.find((q) => q.id === selectedQuizId)?.name}
-          </div>
-        <div className="card-body">
-          <table className="table table-bordered text-center mb-0">
-            <thead className="table-success">
-              <tr>
-                <th>Sr.No</th>
-                <th>Score</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-        <tbody>
-          {userTopScores.map((record, index) => (
-            <tr key={index}>
-              <td>{index + 1}</td>
-              <td>{record.score}</td>
-              <td>{new Date(record.createdAt).toLocaleDateString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-)}
+          )}
+
           <div className="table-responsive">
             <table className="table table-bordered table-hover shadow-sm">
               <thead className="table-primary text-center">
