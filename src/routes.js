@@ -52,25 +52,24 @@ import PrivateRoute from './components/PrivateRoute';
 
 function AppRoutes() {
 return (
-<Router>
-<Navbar />
-<Routes>
-<Route path="/" element={<Home />} />
-<Route path="/login" element={<Login />} />
-<Route path="/register" element={<Register />} />
+    <Router>
+        <Navbar />
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
 
-{/* Use PrivateRoute to protect the routes */}
-<Route path="/quiz" element={<PrivateRoute element={<Quiz />} />} />
-<Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
-<Route path="/quizcard" element={<PrivateRoute element={<QuizCard />} />} />
-<Route path="/questions/:quizId" element={<Questions />} />
-<Route path="/quiz/:quizId" element={<Questions />} />
-<Route path="/quiz/:quizId/questions" element={<Questions />} />
-<Route path="/results/:userId/:quizId" element={<Result />} />
-<Route path="/quiz-history" element={<PrivateRoute element={<QuizHistory />} />} />
-</Routes>
-</Router>
-);
+                <Route path="/quiz" element={<PrivateRoute element={<Quiz />} />} />
+                <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
+                <Route path="/quizcard" element={<PrivateRoute element={<QuizCard />} />} />
+                <Route path="/questions/:quizId" element={<Questions />} />
+                <Route path="/quiz/:quizId" element={<Questions />} />
+                <Route path="/quiz/:quizId/questions" element={<Questions />} />
+                <Route path="/results/:userId/:quizId" element={<Result />} />
+                <Route path="/quiz-history" element={<PrivateRoute element={<QuizHistory />} />} />
+            </Routes>
+    </Router>
+    );
 }
 
 export default AppRoutes;

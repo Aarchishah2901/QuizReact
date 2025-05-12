@@ -2,17 +2,19 @@ import React, { useEffect, useState } from "react";
 import { getQuizHistory } from "../services/api";
 import { Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import Result from './Result';
 
 const QuizHistory = () => {
   const [history, setHistory] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userId = storedUser?.userId || storedUser?._id;
+  const quizId = history.length > 0 ? history[0].quizId?._id : null;
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    const userId = storedUser?.userId || storedUser?._id;
-
     if (!userId) {
       setError("User not logged in.");
       setLoading(false);
@@ -67,6 +69,12 @@ const QuizHistory = () => {
       ) : (
         <>
           <div className="d-flex justify-content-end mb-3">
+            <button
+              className="btn btn-primary me-2"
+              onClick={() => navigate(`/results/${userId}/${quizId}`)}
+            >
+              View Recent Score
+            </button>
             <button
               className="btn btn-success me-2"
               onClick={() => navigate("/dashboard")}

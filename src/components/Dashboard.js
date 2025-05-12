@@ -16,9 +16,8 @@ const Dashboard = () => {
 
   return (
     <div className="container mt-5">
-      <ToastContainer position="top-right" autoClose={2000} />
 
-      {/* Hero Section */}
+      <ToastContainer position="top-right" autoClose={2000} />
       <div className="text-center mb-5">
         <h1 className="display-4 fw-bold text-primary mb-3">
           Welcome to the Ultimate Quiz Challenge
@@ -30,7 +29,6 @@ const Dashboard = () => {
           Our quizzes cover various topics in IT, catering to all skill levels. Whether you're a beginner or an expert, you'll always find something to learn.
         </p>
 
-        {/* Inspirational Thought Box */}
         <div
           className="p-4 rounded shadow-sm mb-5"
           style={{
@@ -46,7 +44,6 @@ const Dashboard = () => {
           </p>
         </div>
 
-        {/* Why Take a Quiz Section */}
         <div className="mb-5">
           <h2 className="text-info mb-3">Why Take a Quiz?</h2>
           <p className="fs-5 text-dark mb-4">
@@ -60,7 +57,6 @@ const Dashboard = () => {
           </ul>
         </div>
 
-        {/* Action Buttons */}
         <div className="d-flex justify-content-center gap-4 mt-4 mb-5">
           <button className="btn btn-success btn-lg px-5 fw-bold" onClick={handleViewQuiz}>
             Start Quiz
@@ -71,7 +67,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Cards Section */}
       <div className="row text-center mb-5">
         <div className="col-md-4 mb-4">
           <div
@@ -128,8 +123,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-
-      {/* Footer Section */}
+      
       <footer className="text-center mt-5 text-muted">
         <p>© 2025 Ultimate Quiz Challenge. All Rights Reserved.</p>
       </footer>

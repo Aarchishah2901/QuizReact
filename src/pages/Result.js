@@ -17,6 +17,7 @@ const Result = () => {
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
+  const API_URL = "http://localhost:5000/api";
 
   useEffect(() => {
     const fetchResult = async () => {
@@ -30,7 +31,7 @@ const Result = () => {
 
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/results/result/${userId}/${quizId}`,
+          `${API_URL}/results/result/${userId}/${quizId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -60,35 +61,7 @@ const Result = () => {
   return (
     <div className="container mt-5">
       <h2 className="text-center text-primary mb-4 display-4 font-weight-bold">Your Quiz Results</h2>
-
-      {/* <div className="card shadow-lg mb-4">
-        <div className="card-body">
-          <h4 className="card-title text-center text-success mb-4">Quiz Summary</h4>
-          <div className="d-flex justify-content-between flex-wrap text-center">
-            <div className="px-3">
-              <h6>Total Questions</h6>
-              <p className="h4">{result?.totalQuestions ?? 'N/A'}</p>
-            </div>
-            <div className="px-3">
-              <h6>Correct Answers</h6>
-              <p className="h4 text-success">{result?.correctAnswers ?? 'N/A'}</p>
-            </div>
-            <div className="px-3">
-              <h6>Wrong Answers</h6>
-              <p className="h4 text-danger">{result?.wrongAnswers ?? 'N/A'}</p>
-            </div>
-            <div className="px-3">
-              <h6>Score Percentage</h6>
-              <p className="h4 text-warning">{result?.score != null ? `${result.score}%` : 'N/A'}</p>
-            </div>
-            <div className="px-3">
-              <h6>Time Taken</h6>
-              <p className="h4 text-info">{formatTime(timeTaken)}</p>
-            </div>
-          </div>
-        </div>
-      </div> */}
-
+      
 <div className="card shadow-lg mb-4">
   <div className="card-body">
     <h4 className="card-title text-center text-success mb-4">Quiz Summary</h4>
