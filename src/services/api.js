@@ -70,6 +70,18 @@ export const getResult = async (userId, quizId) => {
   }
 };
 
+export const getUnansweredQuestions = async (userId, quizId, token) => {
+  try {
+    const res = await axios.get(`${API_URL}/questions/unanswered/${userId}/${quizId}`, {
+      headers: { Authorization: token }
+    });
+    return res.data.questions;
+  } catch (error) {
+    console.error("Error fetching unanswered questions:", error);
+    return [];
+  }
+};
+
 //Quizhistory
 export const getQuizHistory = async (userId) => {
   const response = await axios.get(`${API_URL}/results/history/${userId}`);

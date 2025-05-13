@@ -53,7 +53,7 @@ const Result = () => {
     navigate('/quiz-history');
   };
 
-  const maxTimeInSeconds = result?.maxTime ?? 300;
+  const maxTimeInSeconds = result?.maxTime ?? 60;
 
   if (loading) return <div className="container mt-5 text-center"><h3>Loading...</h3></div>;
   if (error) return <div className="container mt-5 text-center text-danger"><h4>Error: {error}</h4></div>;
